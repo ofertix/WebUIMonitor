@@ -1,0 +1,21 @@
+class: \WebSocketMonitor\Application\MonitorUpstreamErrorRabbitMQ
+subscriber:
+  # rabbitmq
+  debug: false
+  host: localhost
+  port: 5672
+  user: guest
+  pass: guest
+  vhost: /
+  exchanges:
+    - myproject_errors
+    - myproject_events
+  # zeromq
+#  urls:
+#    - 'epgm://eth0;224.1.1.1:5556'
+#    - 'epgm://eth0;224.1.1.1:5558'
+
+websocket:
+  host: localhost
+  port: 8000
+
