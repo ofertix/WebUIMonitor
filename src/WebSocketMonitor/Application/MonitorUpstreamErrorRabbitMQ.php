@@ -79,7 +79,7 @@ class MonitorUpstreamErrorRabbitMQ extends Application
 
         foreach ($this->clients as $k => $sendto)
         {
-            $this->logger->addDebug('Send to: (' . $sendto->getClientId() . ') ' . $sendto->getClientIp() . ':' . $sendto->getClientPort());
+            $this->logger->addDebug('Send to #' . $sendto->getSocketId());
             if (!$sendto->send($data)) {
                 // unsubscribe client
                 unset($this->clients[$k]);
@@ -87,9 +87,14 @@ class MonitorUpstreamErrorRabbitMQ extends Application
         }
     }
 
-    public function onTick()
+    public function onTick($changed_sockets)
     {
-        $this->ch->wait();
+        if(in_array($this->getSocket(), $changed_sockets)) $this->ch->wait();
+    }
+
+    public function getSocket()
+    {
+        return $this->conn->sock;
     }
 
 }

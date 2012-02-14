@@ -7,6 +7,9 @@ namespace WebSocket;
  *
  * @author Moritz Wutz <moritzwutz@gmail.com>
  * @author Nico Kaiser <nico@kaiser.me>
+ *
+ * @author Jordi Llonch <jordi.llonch@ofertix.com>
+ *
  * @version 0.2
  */
 
@@ -39,26 +42,12 @@ class Socket
      */
     private function createSocket($host, $port)
     {
-        if (($this->master = socket_create(AF_INET, SOCK_STREAM, SOL_TCP)) < 0) {
-            die("socket_create() failed, reason: " . socket_strerror($this->master));
-        }
-
-        self::console("Socket {$this->master} created.");
-
-        socket_set_option($this->master, SOL_SOCKET, SO_REUSEADDR, 1);
-        #socket_set_option($master,SOL_SOCKET,SO_KEEPALIVE,1);
-
-        if (($ret = socket_bind($this->master, $host, $port)) < 0) {
-            die("socket_bind() failed, reason: " . socket_strerror($ret));
-        }
-
-        self::console("Socket bound to {$host}:{$port}.");
-
-        if (($ret = socket_listen($this->master, 5)) < 0) {
-            die("socket_listen() failed, reason: " . socket_strerror($ret));
-        }
-
         self::console('Start listening on Socket.');
+
+        $this->master = stream_socket_server("tcp://{$host}:{$port}", $errno, $errstr);
+        if (!$this->master) {
+          die("$errstr ($errno)<br />");
+        }
 
         $this->allsockets[] = $this->master;
     }
@@ -83,7 +72,7 @@ class Socket
      */
     protected function send($client, $msg)
     {
-        socket_write($client, $msg, strlen($msg));
+        fwrite($client, $msg, strlen($msg));
     }
 
 }

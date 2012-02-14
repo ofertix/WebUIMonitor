@@ -14,15 +14,15 @@ abstract class Application
     /**
      * Singleton 
      */
-    protected function __construct($args) { } // HACK LAIGU
+    protected function __construct($args) { } // HACK
 
     final private function __clone() { }
     
-    final public static function getInstance($args = null) // HACK LAIGU
+    final public static function getInstance($args = null) // HACK
     {
         $calledClassName = get_called_class();
         if (!isset(self::$instances[$calledClassName])) {
-            self::$instances[$calledClassName] = new $calledClassName($args); // HACK LAIGU
+            self::$instances[$calledClassName] = new $calledClassName($args); // HACK
         }
 
         return self::$instances[$calledClassName];
@@ -35,4 +35,6 @@ abstract class Application
     public function onTick() { }
 
     public function onData($data, $client) { }
+
+    public function getSocket() { } // HACK
 }

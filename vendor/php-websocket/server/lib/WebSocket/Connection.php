@@ -15,8 +15,7 @@ class Connection
     private $handshaked = false;
     private $application = null;
 
-	private $ip;
-	private $port;
+	private $socket_id;
 	private $connectionId = null;
 
     public function __construct($server, $socket)
@@ -25,10 +24,8 @@ class Connection
         $this->socket = $socket;
 
 		// set some client-information:
-		socket_getpeername($this->socket, $ip, $port);
-		$this->ip = $ip;
-		$this->port = $port;
-		$this->connectionId = md5($ip . $port . spl_object_hash($this));
+        $this->socket_id = (int)$this->socket;
+		$this->connectionId = md5($this->socket_id . spl_object_hash($this));
 
         $this->log('Connected');
     }
@@ -42,7 +39,7 @@ class Connection
         if(!preg_match('/\AGET (\S+) HTTP\/1.1\z/', $lines[0], $matches))
 		{
             $this->log('Invalid request: ' . $lines[0]);
-            socket_close($this->socket);
+            fclose($this->socket);
             return false;
         }
 
@@ -52,7 +49,7 @@ class Connection
         if(!$this->application)
 		{
             $this->log('Invalid application: ' . $path);
-            socket_close($this->socket);
+            fclose($this->socket);
             return false;
         }
 
@@ -71,7 +68,7 @@ class Connection
 		if(!isset($headers['Sec-WebSocket-Version']) || $headers['Sec-WebSocket-Version'] < 6)
 		{
 			$this->log('Unsupported websocket version.');
-            socket_close($this->socket);
+            fclose($this->socket);
             return false;
 		}
 
@@ -83,7 +80,7 @@ class Connection
 		$response.= "Connection: Upgrade\r\n";
 		$response.= "Sec-WebSocket-Accept: " . $secAccept . "\r\n";
 		$response.= "Sec-WebSocket-Protocol: " . substr($path, 1) . "\r\n\r\n";
-		socket_write($this->socket, $response, strlen($response));
+        fwrite($this->socket, $response, strlen($response));
 		$this->handshaked = true;
 		$this->log('Handshake sent');
 		$this->application->onConnect($this);
@@ -107,7 +104,7 @@ class Connection
     {
 		$decodedData = $this->hybi10Decode($data);
 
-    // no data (HACK LAIGU)
+    // no data (HACK)
     if(!isset($decodedData['type'])) return true;
 
 		switch($decodedData['type'])
@@ -135,13 +132,13 @@ class Connection
     public function send($payload, $type = 'text')
     {
 		$encodedData = $this->hybi10Encode($payload, $type);
-		if(!@socket_write($this->socket, $encodedData, strlen($encodedData)))
+		if(!@fwrite($this->socket, $encodedData, strlen($encodedData)))
 		{
-			@socket_close($this->socket);
+			@fclose($this->socket);
 			$this->socket = false;
-            return false; // HACK LAIGU
+            return false; // HACK
 		}
-        return true; // HACK LAIGU
+        return true; // HACK
     }
 
     public function onDisconnect()
@@ -152,12 +149,13 @@ class Connection
 		{
             $this->application->onDisconnect($this);
         }
-        socket_close($this->socket);
+//        socket_close($this->socket);
+        fclose($this->socket);
     }
 
     public function log($message, $type = 'info')
     {
-        $this->server->log('[client ' . $this->ip . ':' . $this->port . '] ' . $message, $type);
+        $this->server->log('[client ' . $this->socket_id . '] ' . $message, $type);
     }
 
 	private function hybi10Encode($payload, $type = 'text')
@@ -312,14 +310,9 @@ class Connection
 		return $decodedData;
 	}
 
-	public function getClientIp()
+	public function getSocketId()
 	{
-		return $this->ip;
-	}
-
-	public function getClientPort()
-	{
-		return $this->port;
+		return $this->socket_id;
 	}
 
 	public function getClientId()

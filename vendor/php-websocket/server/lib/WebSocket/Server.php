@@ -8,10 +8,10 @@ namespace WebSocket;
  */
 class Server extends Socket
 {   
-    // HACK LAIGU
+    // HACK
     protected $clients = array();
 
-    // HACK LAIGU
+    // HACK
     protected $applications = array();
 
     public function __construct($host = 'localhost', $port = 8000, $max = 100)

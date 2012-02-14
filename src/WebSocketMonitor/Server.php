@@ -16,46 +16,63 @@ use \WebSocket\Connection;
 
 class Server extends \WebSocket\Server
 {
+    protected $application_sockets = array();
 
     public function run()
     {
         while (true)
         {
             $changed_sockets = $this->allsockets;
-            @socket_select($changed_sockets, $write = NULL, $except = NULL, 0); // HACK LAIGU, timeout to 0
+            @stream_select($changed_sockets, $write = NULL, $except = NULL, 0); // HACK, timeout to 0
             foreach ($this->applications as $application)
             {
-                $application->onTick();
+                $application->onTick($changed_sockets);
             }
 
             foreach ($changed_sockets as $socket)
             {
+                // no do anything here if it is a socket coming from application
+                if(in_array($socket, $this->application_sockets)) continue;
+
                 if ($socket == $this->master) {
-                    if (($ressource = socket_accept($this->master)) < 0) {
-                        $this->log('Socket error: ' . socket_strerror(socket_last_error($ressource)));
+                    if (($resource = stream_socket_accept($this->master)) < 0) {
+                        $this->log('Socket error');
                         continue;
                     } else
                     {
-                        $client = new Connection($this, $ressource);
-                        $this->clients[$ressource] = $client;
-                        $this->allsockets[] = $ressource;
+                        $client = new Connection($this, $resource);
+                        $this->clients[$resource] = $client;
+                        $this->allsockets[] = $resource;
                     }
                 } else
                 {
                     $client = $this->clients[$socket];
-                    $bytes = @socket_recv($socket, $data, 4096, 0);
-                    if ($bytes === 0) {
+                    if(!feof($socket) && (false !== ($data = fread($socket, 4096))))
+                    {
+                        $client->onData($data);
+                    }
+                    else {
                         $client->onDisconnect();
                         unset($this->clients[$socket]);
                         $index = array_search($socket, $this->allsockets);
                         unset($this->allsockets[$index]);
                         unset($client);
-                    } else
-                    {
-                        $client->onData($data);
                     }
                 }
             }
+        }
+    }
+
+    public function registerApplication($key, $application)
+    {
+        parent::registerApplication($key, $application);
+
+        // add socket to socket_select
+        $sock = $application->getSocket();
+        if(!empty($sock))
+        {
+            $this->allsockets[] = $sock;
+            $this->application_sockets[] = $sock;
         }
     }
 
