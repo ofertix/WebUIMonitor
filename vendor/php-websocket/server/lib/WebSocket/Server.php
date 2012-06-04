@@ -17,7 +17,7 @@ class Server extends Socket
 	// server settings:
 	private $_checkOrigin = true;
 	private $_allowedOrigins = array();
-	private $_maxClients = 30;
+    protected $_maxClients = 30; // HACK
 	private $_maxConnectionsPerIp = 5;
 	private $_maxRequestsPerMinute = 50;
 
@@ -242,7 +242,7 @@ class Server extends Socket
 	 * 
 	 * @param string $ip An ip address.
 	 */
-	private function _addIpToStorage($ip)
+    protected function _addIpToStorage($ip) // HACK
 	{
 		if(isset($this->_ipStorage[$ip]))
 		{
@@ -282,7 +282,7 @@ class Server extends Socket
 	 * @param string $ip An ip address.
 	 * @return bool False if ip has reached max. connection limit. True if connection is allowed. 
 	 */
-	private function _checkMaxConnectionsPerIp($ip)
+    protected function _checkMaxConnectionsPerIp($ip) // HACK
 	{
 		if(empty($ip))
 		{
@@ -301,7 +301,7 @@ class Server extends Socket
 	 * @param string $clientId A client id. (unique client identifier)
 	 * @return bool True if limit is not yet reached. False if request limit is reached. 
 	 */
-	private function _checkRequestLimit($clientId)
+    protected function _checkRequestLimit($clientId) // HACK
 	{
 		// no data in storage - no danger:
 		if(!isset($this->_requestStorage[$clientId]))
