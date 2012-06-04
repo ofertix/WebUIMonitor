@@ -32,14 +32,7 @@ Ext.define('Monitor.lib.Websocket', {
 
   start: function() {
     try {
-      if ( Ext.isGecko )
-      {
-        this.wsocket = new MozWebSocket(this.url);
-      }
-      else
-      {
-        this.wsocket = new WebSocket(this.url);
-      }
+      this.wsocket = new WebSocket(this.url);
     } catch(ex) {
       console.log('exception')
       console.log(ex);
@@ -85,9 +78,7 @@ Ext.define('Monitor.lib.Websocket', {
     console.log('supervisor started...');
     var task = {
       run: function(){
-        if ( Ext.isGecko ) closed = MozWebSocket.CLOSED;
-        else var closed = WebSocket.CLOSED;
-        if(this.wsocket.readyState == closed)
+        if(this.wsocket.readyState == WebSocket.CLOSED)
         {
           console.log('reconnecting websocket...');
           this.start();

@@ -43,9 +43,7 @@ Ext.define('Monitor.lib.WebsocketUpstreamError', {
                 var readyState = this.wsocket.readyState;
 
                 // waiting for first message
-                if (Ext.isGecko) var connecting = MozWebSocket.CONNECTING;
-                else var connecting = WebSocket.CONNECTING;
-                if (readyState == connecting) {
+                if (readyState == WebSocket.CONNECTING) {
                     this.statusBar.setStatus({
                         text: 'Waiting for first message...',
                         iconCls: 'x-status-busy'
@@ -53,9 +51,7 @@ Ext.define('Monitor.lib.WebsocketUpstreamError', {
                 }
 
                 // open
-                if (Ext.isGecko) var open = MozWebSocket.OPEN;
-                else var open = WebSocket.OPEN;
-                if (readyState == open) {
+                if (readyState == WebSocket.OPEN) {
                     this.statusBar.setStatus({
                         text: 'Connected',
                         iconCls: 'x-status-valid'
@@ -63,9 +59,7 @@ Ext.define('Monitor.lib.WebsocketUpstreamError', {
                 }
 
                 // closed
-                if (Ext.isGecko) var closed = MozWebSocket.CLOSED;
-                else var closed = WebSocket.CLOSED;
-                if (readyState == closed) {
+                if (readyState == WebSocket.CLOSED) {
                     this.statusBar.setStatus({
                         text: 'Not connected',
                         iconCls: 'x-status-error'
