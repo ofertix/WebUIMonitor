@@ -70,14 +70,6 @@ Config file has 3 sections:
 See config file for more details.
 
 
-Known issues
-============
-
-RabbitMQ library use a blocking connections so new websocket connections from the browser can not be established until a new message is published.
-
-A solution could be create a proxy process that handles the RabbitMQ subscription and sends new messages to the main process using a pipe with a non-blocking connection.
-
-
 Extra notes
 ===========
 
