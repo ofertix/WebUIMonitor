@@ -32,7 +32,7 @@ abstract class Application
 
     public function onDisconnect($connection) { }
     
-    public function onTick() { }
+    public function onTick($changed_sockets) { } // HACK
 
     public function onData($data, $client) { }
 

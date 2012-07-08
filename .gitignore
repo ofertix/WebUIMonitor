@@ -2,3 +2,7 @@
 .DS_Store
 app/log/*
 !app/log/.empty
+composer.lock
+vendor/*
+!vendor/silex
+!vendor/php-websocket
